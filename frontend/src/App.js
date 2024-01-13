@@ -1,35 +1,30 @@
-import './App.css';
 import io from 'socket.io-client'
-import {useEffect, useState} from 'react'
+import { useState} from 'react'
+import Chat from './Chat';
 
 const socket=io.connect("http://localhost:8000")
 
 function App() {
-  const [message,setMessage]=useState("");
-  const [display,setDisplay]=useState("");
+  const [userName,setUserName]=useState("");
+  const [showChat,setShowChat]=useState(false);
   const [room,setRoom]=useState("");
-  const onSubmit=()=>{
-    socket.emit("send_message",{message,room})
-    setMessage('')
  
-  }
   const joinRoom=()=>{
-    if(room!=="")
+    if(room!==""&&userName!=="")
     socket.emit("join_room",room);
+    setShowChat(true);
   }
-  useEffect(()=>{
-    socket.on("receive_message",(data)=>{
-    setDisplay(data.message)
-   
-    })
-  },[])
+  
   return (
     <div className="App">
-       <input value={room} onChange={(e)=>setRoom(e.target.value)}/>
-   <button onClick={joinRoom}>join</button>
-   <input value={message} onChange={(e)=>setMessage(e.target.value)}/>
-   <button onClick={onSubmit}>send</button>
-   <h3>{display}</h3>
+   {!showChat?(
+    <div>
+      <div className="text-3xl font-bold ">Join a chat</div>
+      <input value={userName} placeholder='enter name' className='border-2 border-black m-5' onChange={(e)=>setUserName(e.target.value)}/>
+    <div>  <input value={room} placeholder='enter room id' className='border-2 border-black m-5' onChange={(e)=>setRoom(e.target.value)}/></div>
+      <button onClick={joinRoom} className='border-2 border-black m-5 p-1 px-3' >join</button>
+    </div>
+   ):(<Chat socket={socket} userName={userName} room={room}/>)}
     </div>
   );
 }
