@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import io from 'socket.io-client'
-export const socket=io.connect("http://localhost:8000")
+export const Socket=io.connect("http://localhost:8000")
 
 const MainChat = () => {
   const location = useLocation();
   const {userName} = location.state;
   const navigate = useNavigate();
   const [allChat, setAllChat] = useState();
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,7 +25,7 @@ const MainChat = () => {
   }, [userName]);
 
   const newPage=(newUser)=>{
-    socket.emit("join_room",newUser);
+    Socket.emit("join_room",newUser);
     navigate('./chat', { state: { userName, room:newUser } })
   }
 
