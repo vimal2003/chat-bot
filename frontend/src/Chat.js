@@ -1,11 +1,18 @@
 import React,{useEffect,useState} from 'react'
 import axios from 'axios';
-
-const Chat = ({socket,userName,room}) => {
+import { useLocation } from 'react-router-dom';
+// import io from 'socket.io-client'
+import { socket} from './MainChat'
+const Chat = () => { 
+    //const socket=Socket
+    // const socket=io.connect("http://localhost:8000")
+    const location=useLocation();
+    const {userName,room}=location.state;
    const [currentMessage,setCurrentMessage]=useState("");
    const [messageList,setMessageList]=useState([]);
    const [searchText,setSearchText]=useState("");
    const [displaySearch,setDisplaySearch]=useState([]);
+   const [display,setDisplay]=useState(false);
    const submit=async()=>{
     if(currentMessage!==''){
        
@@ -17,6 +24,7 @@ const Chat = ({socket,userName,room}) => {
         }
         await socket.emit("send_message",message);
         setMessageList((list)=>[...list,message]);
+        setDisplay(!display);
         setCurrentMessage("");
        
     }
@@ -41,14 +49,16 @@ useEffect(()=>{
     result();
 },[room,userName])
    useEffect(() => {
+   
     const message = (data) => {
         setMessageList((list) => [...list, data]);
     };
     socket.on("receive_message", message);
+    console.log(display,messageList)
     return () => {
         socket.off("receive_message", message);
     };
-}, [socket]);
+}, [display]); 
 
 useEffect(()=>{
   axios.get("http://localhost:8000/user/getUser").then((data)=>{

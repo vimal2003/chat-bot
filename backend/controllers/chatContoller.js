@@ -3,7 +3,7 @@ const Chat=require('../modals/chatModal');
 exports.getChat=async(_,res)=>{
   try{
     const chat=await Chat.find();
-    res.status(200).json({message:"success",
+    return res.status(200).json({message:"success",
   chat})
   }
   catch(error){
@@ -16,8 +16,9 @@ exports.getChat=async(_,res)=>{
 exports.getAllUserChat=async(req,res)=>{
   try{
     const {chatName}=req.body;
-    const chat=await Chat.find({chatName});
-    res.status(200).json({message:"success",
+    const chat = await Chat.find({ chatName: { $regex: new RegExp(chatName, 'i') } });
+    // console.log(chatName,'kk',chat)
+    return res.status(200).json({message:"success",
   chat})
   }
   catch(error){
@@ -31,7 +32,7 @@ exports.getsinglechat=async(req,res)=>{
   try{
     const {chatName}=req.body;
     const chat=await Chat.findOne({chatName});
-    //console.log(req,chat,'kk')
+    // console.log(chatName,chat,'kk')
     res.status(200).json({message:"success",
   chat})
   }
