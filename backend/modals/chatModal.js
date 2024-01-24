@@ -7,6 +7,9 @@ const chatSchema=new mongoose.Schema({
     },
     chat:{
        type:Array
+    },
+    lastSeen:{
+       type:String
     }
 })
 

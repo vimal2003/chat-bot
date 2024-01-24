@@ -17,7 +17,7 @@ exports.getAllUserChat=async(req,res)=>{
   try{
     const {chatName}=req.body;
     const chat = await Chat.find({ chatName: { $regex: new RegExp(chatName, 'i') } });
-    // console.log(chatName,'kk',chat)
+    //console.log('kk',chat[1].chat?.length)
     return res.status(200).json({message:"success",
   chat})
   }
@@ -31,9 +31,9 @@ exports.getAllUserChat=async(req,res)=>{
 exports.getsinglechat=async(req,res)=>{
   try{
     const {chatName}=req.body;
-    const chat=await Chat.findOne({chatName});
-    // console.log(chatName,chat,'kk')
-    res.status(200).json({message:"success",
+    let chat=await Chat.findOne({chatName});
+     //console.log(chat);
+    return res.status(200).json({message:"success",
   chat})
   }
   catch(error){
@@ -45,14 +45,30 @@ exports.getsinglechat=async(req,res)=>{
 exports.addChat = async (req, res) => {
   try {
       const { chatName, chat } = req.body;
+var currentDate = new Date();
+
+var currentYear = currentDate.getFullYear();
+var currentMonth = currentDate.getMonth() + 1; 
+var currentDay = currentDate.getDate();
+var currentHour = currentDate.getHours();
+var currentMinute = currentDate.getMinutes();
+var currentSecond = currentDate.getSeconds();
+
+var formattedDateTime = currentYear + '-' + addLeadingZero(currentMonth) + '-' + addLeadingZero(currentDay) + ' ' +
+                        addLeadingZero(currentHour) + ':' + addLeadingZero(currentMinute) + ':' + addLeadingZero(currentSecond);
+
+function addLeadingZero(number) {
+    return number < 10 ? '0' + number : number;
+}
 
       const existingChat = await Chat.findOne({ chatName });
-
       if (existingChat) {
         if (chat) {
             await Chat.updateOne(
               { _id: existingChat._id },
-              { $set: { chat: [...chat] } },
+              { $set: { chat: [...chat],
+                lastSeen:formattedDateTime } },
+              
               { bypassDocumentValidation: true }
             );
       
@@ -62,8 +78,10 @@ exports.addChat = async (req, res) => {
           }}else {
           const newChat = await Chat.create({
               chatName,
-              chat
+              chat,
+              lastSeen:formattedDateTime
           });
+          
           return res.status(200).json({ ch: newChat });
       }
   } catch (error) {

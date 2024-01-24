@@ -30,10 +30,17 @@ io.on("connection",(socket)=>{
         socket.join(data);
         console.log(`user with ID : ${socket.id} joined room: ${data}`)
     })
+    
     socket.on("send_message",(data)=>{
         socket.to(data.room).emit("receive_message",data);
-        console.log(data,'ll');
+        socket.to(data.room).emit("new_user",data);
+      // console.log(data,'ll');
     })
+    // socket.on("main_chat",(data)=>{
+    //     console.log(data)
+    //     socket.to(data.room).emit("new_user",data);
+    // })
+
     socket.on("disconnect",()=>{
         console.log(`User Disconnected`,socket.id)
     })
