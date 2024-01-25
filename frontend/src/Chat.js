@@ -3,11 +3,11 @@ import axios from 'axios';
 //import { useLocation } from 'react-router-dom';
 import ScrollToBottom from "react-scroll-to-bottom";
 import { Socket} from './Main'
-const Chat = ({userName,room,toggle}) => { 
+const Chat = ({userName,room,toggle,setAllChat}) => { 
     const socket=Socket;
    const [currentMessage,setCurrentMessage]=useState("");
    const [messageList,setMessageList]=useState([]);
-   
+ 
    const submit=async()=>{
     if(currentMessage!==''&&userName&&room){
        
@@ -27,19 +27,21 @@ const Chat = ({userName,room,toggle}) => {
           }));
           const chatName=[room,userName].sort().join('-').toLowerCase();
         await axios.post("http://localhost:8000/chat/addchat",{chatName,chat:[...updatedMessageList,message]})
+    
         await socket.emit("send_message",message);
        // console.log(message,'kk');
-        toggle();
+       
         setCurrentMessage("");
        
     }
+    toggle();
 }
 
 
 useEffect(()=>{
     const result =async()=>{
+       
         const chatName=[room,userName].sort().join('-').toLowerCase();
-       // await socket.emit("mainchat",{room,userName});
    await axios.post("http://localhost:8000/chat/getsinglechat",{chatName}).then((res)=>{
     if(res?.data?.chat?.chat){
         const updatedMessageList = res?.data?.chat?.chat.map(message => ({
@@ -47,26 +49,34 @@ useEffect(()=>{
             seen: message.author !== userName ? true:message.seen,
            
           }));
-          //console.log(updatedMessageList)
-        //  const ch=[room,userName].sort().join('-').toLowerCase();
-        //   axios.post("http://localhost:8000/chat/addchat",{chatName:ch,chat:updatedMessageList})
-        //   socket.emit("main_chat",{room});
-    setMessageList(updatedMessageList);}
+          const change=res.data.chat
+         
+         
+         const ch=[room,userName].sort().join('-').toLowerCase();
+          axios.post("http://localhost:8000/chat/addchat",{chatName:ch,chat:updatedMessageList})
+    setMessageList(updatedMessageList);
+ 
+    setAllChat(prevAllChat => prevAllChat.map(obj => (obj.id === change.id ? 
+        { ...obj, chat: updatedMessageList } : obj)));
+         socket.emit("main_chat",{room});
+}
    })
 
     }
+    if(userName&&room)
     result();
 
-},[room,userName,socket])
+},[room,userName,setAllChat,socket])
    useEffect(() => {
    
     const message = (data) => {
-       
         setMessageList((list) => [...list, data]);
-        //console.log(updatedMessageList,messageList)
+        
+     
        
     };
     socket.on("receive_message", message);
+   
     return () => {
         socket.off("receive_message", message);
     };
@@ -79,17 +89,18 @@ useEffect(()=>{
         <div className={`border border-black  h-[90%]
     overflow-y-scroll `}>
                 <div className='p-3 h-12 -mt-2 bg-violet-400 fixed w-full z-10 border border-black'>{room}</div>
-                <ScrollToBottom className='w-[100%] h-[100%] overflow-x-hidden overflow-y-scroll'>
-        {messageList&&messageList.map((mes,i)=>{
+                <ScrollToBottom className='w-[100%] h-[100%] mt-12 overflow-x-hidden overflow-y-scroll'>
+        {room&&messageList&&messageList.map((mes,i)=>{
             return(
-                <div key={i} className={mes.author===userName?'bg-red-400 rounded-l-lg w-[60%] mb-3 float-right'
-                :'bg-blue-400 rounded-r-lg w-[60%]  mb-3 float-left'}>
+                <div key={i} >{(mes.author===userName||mes.author===room)&&
+                <div  className={mes.author===userName?'bg-red-400 rounded-l-lg w-[60%] mb-3 float-right'
+                :'bg-blue-400 rounded-r-lg w-[60%]   mb-3 float-left'}>
                     <p>{mes.message}</p>
                     <div className='flex text-xs'>
                     <p className='pr-3 '>{mes.author}</p>
                     <p>{mes.time}</p>
                     </div>
-                </div>
+                </div>}</div>
             )
         })}</ScrollToBottom></div>
         <div className='h-[10%]'>
@@ -97,6 +108,7 @@ useEffect(()=>{
         onKeyPress={(e)=>e.key==="Enter"&&submit()} className='border-2 border-black my-5 w-[90%]' />
       <button onClick={submit }className='border-2 border-black my-5 w-[10%]' >send</button>
         </div>
+        
     </div>
   )
 }

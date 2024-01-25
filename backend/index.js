@@ -36,10 +36,10 @@ io.on("connection",(socket)=>{
         socket.to(data.room).emit("new_user",data);
       // console.log(data,'ll');
     })
-    // socket.on("main_chat",(data)=>{
-    //     console.log(data)
-    //     socket.to(data.room).emit("new_user",data);
-    // })
+    socket.on("main_chat",(data)=>{
+        console.log(data)
+        socket.to(data.room).emit("new_user",data);
+    })
 
     socket.on("disconnect",()=>{
         console.log(`User Disconnected`,socket.id)

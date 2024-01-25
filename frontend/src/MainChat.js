@@ -15,6 +15,10 @@ const MainChat = () => {
    const [displaySearch,setDisplaySearch]=useState([]);
    const [newUser,setNewUser]=useState();
    const [page,setPage]=useState(true);
+   useEffect(()=>{
+    Socket.emit("join_room",userName);
+
+   },[userName])
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -53,28 +57,38 @@ const MainChat = () => {
   },[searchText])
   const toggle=()=>{
     setPage(!page)
-    //console.log(page)
   }
 useEffect(() => {
    
     const message = async(data) => {
-      // console.log(data,'pppp')
+      console.log(data,'pppp')
        const response = await axios.post("http://localhost:8000/chat/getalluserchat", { chatName: userName });
         const res=response.data.chat.sort(function(a, b) {
           var dateA = new Date(a.lastSeen);
           var dateB = new Date(b.lastSeen);
           return dateB - dateA;
       })
-      //console.log(allChat)
         setAllChat(res);
-       // console.log(allChat)
-        //setMessageList((list) => [...list, data]);       
+            
     };
     socket.on("new_user", message);
     return () => {
         socket.off("new_user", message);
     };
-}); 
+},[socket,userName]); 
+//useEffect(() => {
+   
+//   const message = (data) => {
+// setPage((page)=>!page)      
+   
+     
+//   };
+//   socket.on("main_chat", message);
+ 
+//   return () => {
+//       socket.off("main_chat", message);
+//   };
+// }, [socket]); 
  
   return (
     <div className=' h-screen border border-black flex'>
@@ -115,7 +129,7 @@ useEffect(() => {
       </div>
       <div className='w-full'>
       <Chat userName={userName} room={newUser} toggle={toggle}
-      /> 
+      allChat={allChat} setAllChat={setAllChat}/> 
       </div>
    
     </div>

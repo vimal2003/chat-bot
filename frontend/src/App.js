@@ -1,6 +1,6 @@
 import { useState} from 'react'
 import { useNavigate } from 'react-router-dom';
-import { Socket } from './Main';
+//import { Socket } from './Main';
 
 function App() {
   const navigate=useNavigate();
@@ -8,7 +8,7 @@ function App() {
  
   const joinRoom=()=>{
     if(userName!==""){
-     Socket.emit("join_room",userName);
+    // Socket.emit("join_room",userName);
   navigate('/mainchat',{state:{userName}})}
   } 
   
